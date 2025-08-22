@@ -3,8 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
+	"log"
 	"net/http"
+
+	"github.com/Gopher0727/GoWebTest/controller"
+	"github.com/Gopher0727/GoWebTest/middleware"
 )
 
 var (
@@ -14,10 +19,26 @@ var (
 
 func main() {
 	// 建立路由
+	// mux := http.NewServeMux()
+
 	// 注册路径 -- http 注册的是 DefaultServeMux，自定义的话可以用 http.NewServeMux() 创建一个 Handler/多路复用器（本身也是一个 Handler）
+	templates := template.Must(template.ParseGlob("templates/*.html"))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello, Go Web"))
+		fileName := r.URL.Path[1:]
+		t := templates.Lookup(fileName)
+		if t != nil {
+			err := t.Execute(w, nil)
+			if err != nil {
+				log.Fatalln(err.Error())
+			}
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
 	})
+	// ! 注意 html 文件中路径没有添加 assets
+	http.Handle("/css/", http.FileServer(http.Dir("assets")))
+	http.Handle("/img/", http.FileServer(http.Dir("assets")))
+
 	// 向 http.DefaultServeMux 注册
 	http.Handle("/hello", &m0)
 	http.Handle("/about", &m1)
@@ -71,7 +92,7 @@ func main() {
 	// file test
 	http.HandleFunc("/process", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
-			http.ServeFile(w, r, "./template/index.html")
+			http.ServeFile(w, r, "./templates/index.html")
 			return
 		}
 
@@ -89,14 +110,18 @@ func main() {
 		}
 	})
 
+	controller.RegisterRoutes()
+
 	// 启动服务
-	server := http.Server{
-		Addr:    "localhost:8080",
-		Handler: nil,
-		// Handler: &m0,
-	}
-	// http.ListenAndServe("localhost:8080", nil) // nil -> http.DefaultServeMux
-	server.ListenAndServe()
+	http.ListenAndServe("localhost:8080", &middleware.TimeoutMiddleware{Next: new(middleware.AuthMiddleware)}) // nil -> http.DefaultServeMux
+	// server := http.Server{
+	// 	Addr:    "localhost:8080",
+	// 	Handler: nil,
+	// 	// Handler: &m0,
+	// }
+	// server.ListenAndServe()
+
+	// http.ListenAndServeTLS("localhost:8080", "cert.pem", "key.pem", nil)
 }
 
 type helloHandler struct{}

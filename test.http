@@ -22,3 +22,26 @@ Content-Type: application/json
     "name": "Alice",
     "id": 1
 }
+
+### 
+POST /companies HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+
+{
+    "id": 123,
+    "name": "Google",
+    "country": "USA"
+}
+
+### Authorization test
+POST /companies HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+Authorization: 1
+
+{
+    "id": 123,
+    "name": "Google",
+    "country": "USA"
+}

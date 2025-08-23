@@ -7,9 +7,9 @@ import (
 	"io"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 
 	"github.com/Gopher0727/GoWebTest/controller"
-	"github.com/Gopher0727/GoWebTest/middleware"
 )
 
 var (
@@ -113,13 +113,20 @@ func main() {
 	controller.RegisterRoutes()
 
 	// 启动服务
-	http.ListenAndServe("localhost:8080", &middleware.TimeoutMiddleware{Next: new(middleware.AuthMiddleware)}) // nil -> http.DefaultServeMux
-	// server := http.Server{
-	// 	Addr:    "localhost:8080",
-	// 	Handler: nil,
-	// 	// Handler: &m0,
-	// }
-	// server.ListenAndServe()
+	// 测试 -- 性能分析
+	go func() {
+		log.Println("Pprof starting at :8000")
+		server := http.Server{
+			Addr:    "localhost:8000",
+			Handler: nil,
+		}
+		server.ListenAndServe()
+	}()
+
+	// 主端口
+	log.Println("Server starting at :8080")
+	http.ListenAndServe("localhost:8080", nil)
+	// http.ListenAndServe("localhost:8080", &middleware.TimeoutMiddleware{Next: new(middleware.AuthMiddleware)}) // nil -> http.DefaultServeMux
 
 	// http.ListenAndServeTLS("localhost:8080", "cert.pem", "key.pem", nil)
 }

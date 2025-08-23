@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	config "github.com/Gopher0727/GoWebTest/model"
+	"github.com/Gopher0727/GoWebTest/model"
 )
 
 func registerCompanyRoutes() {
@@ -17,7 +17,7 @@ func handlerCompanies(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		dec := json.NewDecoder(r.Body)
-		company := config.Company{}
+		company := model.Company{}
 		err := dec.Decode(&company)
 		if err != nil {
 			log.Println(err)
@@ -39,5 +39,12 @@ func handlerCompanies(w http.ResponseWriter, r *http.Request) {
 }
 
 func handlerCompany(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("company"))
+	c := model.Company{
+		ID:      1,
+		Name:    "Google",
+		Country: "USA",
+	}
+
+	enc := json.NewEncoder(w)
+	enc.Encode(c)
 }

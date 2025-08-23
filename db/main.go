@@ -7,16 +7,16 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	config "github.com/Gopher0727/GoWebTest/model"
+	"github.com/Gopher0727/GoWebTest/model"
 )
 
 func main() {
-	data, err := os.ReadFile("config.toml")
+	data, err := os.ReadFile("model.toml")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	var cfg config.Config
+	var cfg model.Config
 	err = toml.Unmarshal(data, &cfg)
 	if err != nil {
 		log.Fatalln(err)
@@ -33,7 +33,7 @@ func main() {
 	fmt.Println("docker-compose.yml 已生成成功！执行 docker compose pull 即可")
 }
 
-func generateDockerCompose(cfg config.Config) string {
+func generateDockerCompose(cfg model.Config) string {
 	return fmt.Sprintf(`services:
     mysql:
         image: mysql:8.0
